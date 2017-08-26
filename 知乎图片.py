@@ -1,6 +1,5 @@
 #!/usr/bin/Python
 # -*- coding: utf-8 -*-
-
 # #requests.get()返回Response，urlopen（）返回HTTPResponse
 # #requests.get().content方法返回数据类型为bytes，  .text方法返回str类型
 # #urlopen()返回值无.content 和.text 方法但是有.read方法，其返回的数据类型为bytes
