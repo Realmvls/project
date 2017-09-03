@@ -5,19 +5,14 @@
 #所有图片以手机名称命名+价格命名并下载到本地
 #多线程 共216964条数据
 
-#sql语句还没实现
+#基本框架出来了，剩下的解决分布式和存入mysql中的数据匹配的问题
 
 import requests
 from bs4 import BeautifulSoup
 import re
 import pymysql
-Headers={'User-Agent':'Mozilla/5.0 (Windows NT 6.3; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/60.0.3112.90 Safari/537.36'}
-allname = []
-alltitle = []
-allprice = []
-allurl = []
-img = []
 urllist = []
+Headers={'User-Agent':'Mozilla/5.0 (Windows NT 6.3; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/60.0.3112.90 Safari/537.36'}
 def gethtml(url):
     try:
         html = requests.get(url,headers = Headers).content
@@ -41,10 +36,10 @@ def getname(soup):
 def gettitle(soup):
     try:
         titles = soup.select('.a-size-small.a-color-secondary')                                #所要获取的title夹在两个空span标签中间
-        alltitle = [i for idx,i in enumerate(titles[1:-1])if titles[idx] == titles[idx+2] ]        #此处取得的title中混入了两个不相关的数据
-        print('获取标签{}个'.format(len(alltitle)))
-        # for title in alltitle:
-        #     print(title.text)
+        selecttitles = [i for idx,i in enumerate(titles[1:-1])if titles[idx] == titles[idx+2] ]        #此处取得的title中混入了两个不相关的数据
+        print('获取标签{}个'.format(len(selecttitles)))
+        for title in selecttitles:
+            alltitle.append(title.text)
         return alltitle
     except Exception as e:
         print(e)
@@ -79,6 +74,7 @@ def getpicture(soup):
         print('获取图片个数{}个'.format(len(imgs)))
         for i, j in enumerate(imgs):
             with open('F:/spider_data/amazon图片/第{}页，第{}张.jpg'.format(page,i), 'wb') as file:         #用format填充两个参数时的用法
+            #with open('F:/spider_data/amazon图片/{},{}.jpg'.format(allname[i],allprice[i]),'wb') as file:       #这里写成这样每页保存几个图片后就会报错，怀疑是图片命名格式有问题，待修改。。。
                 file.write(requests.get(j).content)
                 print('正在保存第{}张图片'.format(i))
         return
@@ -96,18 +92,28 @@ cur = conn.cursor()
 base_url = 'https://www.amazon.cn/s/ref=sr_pg_{}?fst=as:on&rh=k:手机,n:664978051&page={}&keywords=手机&ie=UTF8&qid=1504354063'
 url_list(base_url)
 page = 1   #用来记录抓取的页数
-num = 0    #用来记录第几条数据
 for url in urllist:
+    allname = []
+    alltitle = []
+    allprice = []
+    allurl = []
+    img = []
     print('第{}页'.format(page))
     soup = gethtml(url)
     getname(soup)
     gettitle(soup)
     getprice(soup)
     geturl(soup)
-    for num in range(len(allname)+1):
-        cur.execute('insert into phone (name,title,price,url) values (allname[num],alltitle[num],allprice[num],allurl[num]);')
-        num = num + 1
-        print('正在写入第{}条数据'.format(num))
+    for num in range(len(allname)):
+        try:
+            # cur.execute('insert into phone (name,title,price,url) values ({},{},{},{})'.format(allname[num],alltitle[num],allprice[num],allurl[num]))   #这样写有点小问题，待修改。。。
+            sql = ('insert into phone(name,title,price,url) values(%s,%s,%s,%s)')
+            cur.execute(sql,(allname[num],alltitle[num],allprice[num],allurl[num]))
+            conn.commit()
+            print('正在写入第{}条数据'.format(num))
+        except Exception as e:
+            print(e)
+            print("录入mysql出错")
     getpicture(soup)
     page = page+1
 cur.close()
