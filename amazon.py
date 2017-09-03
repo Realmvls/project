@@ -11,11 +11,14 @@ import requests
 from bs4 import BeautifulSoup
 import re
 import pymysql
+import random
 urllist = []
+Proxies = []
 Headers={'User-Agent':'Mozilla/5.0 (Windows NT 6.3; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/60.0.3112.90 Safari/537.36'}
 def gethtml(url):
+    proxy = random.choice(Proxies)
     try:
-        html = requests.get(url,headers = Headers).content
+        html = requests.get(url,headers = Headers,proxies=proxy).content
         soup = BeautifulSoup(html, 'html.parser')
         return soup                   #这句很关键啊啊啊啊
     except Exception as e:
@@ -86,6 +89,19 @@ def url_list(base_url):
         url = base_url.format(i,i)
         urllist.append(url)
     return urllist
+#设置代理ip
+try:
+    file = open('F:/spider_data/ip.txt','r')
+    while True:
+        line = file.readline()
+        if line:
+            Proxies.append(line)
+        else:
+            break
+    file.close()
+except Exception as e:
+    print(e)
+    print("ip代理池写入失败")
 
 conn = pymysql.connect(host = '127.0.0.1',port = 3306,user = 'root',password = '',db = 'amazon',charset = 'utf8mb4',cursorclass = pymysql.cursors.DictCursor)
 cur = conn.cursor()
