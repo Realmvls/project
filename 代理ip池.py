@@ -3,6 +3,12 @@
 #获取西刺代理ip
 #http://www.xicidaili.com/wn/       https代理
 #http://www.xicidaili.com/wt/       http代理
+
+
+
+
+
+#并没有成功使用代理访问检测代理是否失效的网站。。明天改
 import requests
 from bs4 import BeautifulSoup
 
@@ -52,13 +58,15 @@ print('共有{}个代理ip可以使用'.format(len(finallyip)))             #共
 #将筛选过的代理保存到磁盘
 try:
     for u in finallyip:
-        file = open('F:/spider_data/ip.csv', 'w')  # a的意思是接着写入，改成w则为替换写入
+        file = open('F:/spider_data/ip.txt', 'w')  # a的意思是接着写入，改成w则为替换写入
         for e in finallyip:
             file.write(str(e))  # 此处finallyip为列表，里面的所有的元素为字典对象，file.write的对象必须是字符串所以用str转换一下
             file.write('\n')
-            file.close()
-except:
-    print('文件写入失败')
+    file.close()
+    print('文件写入成功')
+except Exception as e:
+
+    print('文件写入失败',e)
 
 # 随机或按顺序获取finallyip并把它直接传入requests的get方法中便可切换代理访问网址
 # web_data = requests.get(url, headers=headers, proxies=proxies)
