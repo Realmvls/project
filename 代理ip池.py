@@ -8,7 +8,7 @@ from bs4 import BeautifulSoup
 import random,time
 
 def get_ip_list(url,Headers):
-    time.sleep(random.randint(0, 2))
+    time.sleep(random.randint(0, 5))
     try:
         html = requests.get(url,headers=Headers).content
         soup = BeautifulSoup(html,'html.parser')
@@ -49,8 +49,8 @@ def check_ip_list(z):
         print('正在处理第%d个'%(p),proxy)
         p = p+1
         try:
-            response = requests.get(url,proxies=proxy,timeout = 0.5).getcode()           #此处可传递proxies参数，urlopen不可以传递proxies参数。以代理模式访问目标网址
-            time.sleep(random.randint(0,2))
+            time.sleep(random.randint(0,1.5))
+            response = requests.get(url,proxies=proxy,timeout = 1)           #此处可传递proxies参数，urlopen不可以传递proxies参数。以代理模式访问目标网址
             finallyip.append(proxy)
             print('可用！！',response.text)
         except Exception as e:           # Exception 为所有异常的基类。此句为捕捉多个异常并将异常对象输出
