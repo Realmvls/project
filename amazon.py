@@ -3,9 +3,10 @@
 #使用代理ip
 #amazon 手机名称 品牌,url,价格导入数据库,导出csv,xls格式各一份
 #所有图片以手机名称命名+价格命名并下载到本地
-#多线程 共216964条数据
+#多线程 共216964条数据   （此处未完待续）
 
 #基本框架出来了，剩下的解决分布式和存入mysql中的数据匹配的问题
+#F:/spider_data/ip.txt中保存着之前筛选出来的代理ip
 
 import requests
 from bs4 import BeautifulSoup
@@ -38,8 +39,8 @@ def getname(soup):
         print('获取names列表失败')
 def gettitle(soup):
     try:
-        titles = soup.select('.a-size-small.a-color-secondary')                                #所要获取的title夹在两个空span标签中间
-        selecttitles = [i for idx,i in enumerate(titles[1:-1])if titles[idx] == titles[idx+2] ]        #此处取得的title中混入了两个不相关的数据
+        titles = soup.select('.a-size-small.a-color-secondary')                                      #所要获取的title夹在两个空span标签中间
+        selecttitles = [i for idx,i in enumerate(titles[1:-1])if titles[idx] == titles[idx+2] ]     #此处取得的title中混入了两个不相关的数据
         print('获取标签{}个'.format(len(selecttitles)))
         for title in selecttitles:
             alltitle.append(title.text)
@@ -76,7 +77,7 @@ def getpicture(soup):
         imgs = re.findall('src="(.*?)"',str(pictures))
         print('获取图片个数{}个'.format(len(imgs)))
         for i, j in enumerate(imgs):
-            with open('F:/spider_data/amazon图片/第{}页，第{}张.jpg'.format(page,i), 'wb') as file:         #用format填充两个参数时的用法
+            with open('F:/spider_data/amazon图片/第{}页，第{}张.jpg'.format(page,i), 'wb') as file:             #用format填充两个参数时的用法
             #with open('F:/spider_data/amazon图片/{},{}.jpg'.format(allname[i],allprice[i]),'wb') as file:       #这里写成这样每页保存几个图片后就会报错，怀疑是图片命名格式有问题，待修改。。。
                 file.write(requests.get(j).content)
                 print('正在保存第{}张图片'.format(i))
@@ -102,7 +103,7 @@ try:
 except Exception as e:
     print(e)
     print("ip代理池写入失败")
-
+#连接数据库
 conn = pymysql.connect(host = '127.0.0.1',port = 3306,user = 'root',password = '',db = 'amazon',charset = 'utf8mb4',cursorclass = pymysql.cursors.DictCursor)
 cur = conn.cursor()
 base_url = 'https://www.amazon.cn/s/ref=sr_pg_{}?fst=as:on&rh=k:手机,n:664978051&page={}&keywords=手机&ie=UTF8&qid=1504354063'
