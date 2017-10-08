@@ -40,9 +40,13 @@ class hozinSpider:
         return
     def get_picture(self,html):
         #匹配出网页中的图片链接
+        allurl = []
         soup = BeautifulSoup(html,"html.parser")
         piclist = soup.select('.BDE_Image')
-        for n in piclist:
+        for pic in piclist:
+            href = pic.attrs['src']
+            allurl.append(href)
+        for n in allurl:
             self.save_picture(str(n))
         return
     def save_picture(self,img):
